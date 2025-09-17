@@ -45,6 +45,7 @@ npm install
 ```
 
 3. Configure environment variables in .env for Cloud SQL connection: 
+
 ```ini
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
