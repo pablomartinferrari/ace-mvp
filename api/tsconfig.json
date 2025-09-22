@@ -19,6 +19,9 @@
     "resolveJsonModule": true,
     "importHelpers": true,
     "baseUrl": ".",
+    "paths": {
+      "*": ["*"]
+    },
     "strict": true
   },
   "include": ["**/*.ts"],

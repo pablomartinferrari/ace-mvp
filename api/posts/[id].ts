@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import connectDB from '../../_utils/db';
-import Post from '../../_utils/models/Post';
+import connectDB from '../_utils/db';
+import Post from '../_utils/models/Post';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers

@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IPost extends Document {
+  _id: mongoose.Types.ObjectId;
   type: 'NEED' | 'HAVE';
   content: string;
-  userId: string;
+  userId: mongoose.Types.ObjectId;
   imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -21,7 +22,8 @@ const PostSchema = new Schema({
     trim: true
   },
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   imageUrl: {

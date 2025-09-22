@@ -1,9 +1,9 @@
-import { VercelResponse } from '@vercel/node';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { v2 as cloudinary } from 'cloudinary';
 import connectDB from '../_utils/db';
 import Post from '../_utils/models/Post';
 import User from '../_utils/models/User';
-import { AuthenticatedRequest, verifyToken } from '../_utils/auth';
+import { verifyToken } from '../_utils/auth';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -68,10 +68,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       .filter(id => /^[0-9a-fA-F]{24}$/.test(id));
 
     const uniqueUserIds = [...new Set(validUserIds)];
-    const users = await User.find({ _id: { $in: uniqueUserIds } }).select('name');
-    const userMap = new Map(users.map(user => [user._id.toString(), user.name]));
-
-    const formattedPosts = posts.map(post => ({
+      const users = await User.find({ _id: { $in: uniqueUserIds } }).select('username');
+    const userMap = new Map(users.map(user => [user._id.toString(), user.username]));    const formattedPosts = posts.map(post => ({
       id: post._id.toString(),
       type: post.type,
       content: post.content,
@@ -83,8 +81,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 
     res.status(200).json(formattedPosts);
   } else {
-    const user = await User.findById(userId).select('name');
-    const userName = user ? user.name : 'Unknown User';
+    const user = await User.findById(userId).select('username');
+    const userName = user ? user.username : 'Unknown User';
 
     const formattedPosts = posts.map(post => ({
       id: post._id.toString(),
@@ -101,15 +99,16 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handlePost(req: VercelRequest, res: VercelResponse) {
-  // Verify authentication token
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
+  // Extract user from token
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  // Extract user from token (implement your auth logic here)
-  const token = authHeader.split(' ')[1];
-  // TODO: Verify token and get userId
+  const decoded = await verifyToken(token);
+  if (!decoded) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
 
   const { type, content, image } = req.body;
 
@@ -141,12 +140,12 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   const newPost = new Post({
     type,
     content: content.trim(),
-    userId: req.user.id, // From auth middleware
+    userId: decoded.userId,
     imageUrl
   });
 
   const savedPost = await newPost.save();
-  const user = await User.findById(req.user.id).select('name');
+  const user = await User.findById(decoded.userId).select('username');
 
   res.status(201).json({
     success: true,
@@ -155,7 +154,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       type: savedPost.type,
       content: savedPost.content,
       userId: savedPost.userId,
-      userName: user ? user.name : 'Unknown User',
+      userName: user ? user.username : 'Unknown User',
       createdAt: savedPost.createdAt.toISOString(),
       imageUrl: savedPost.imageUrl
     }

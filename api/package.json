@@ -7,7 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@vercel/node": "^3.0.15",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.7.0",
     "dotenv": "^16.3.1",
@@ -17,6 +16,8 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^24.5.2",
+    "@vercel/node": "^5.3.23",
     "typescript": "^5.3.3"
   }
 }
